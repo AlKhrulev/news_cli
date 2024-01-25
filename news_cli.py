@@ -1,6 +1,6 @@
 from __future__ import annotations
 from argparse import ArgumentParser, ArgumentTypeError
-from typing import Callable # to indicate a function type hint
+from typing import Callable  # to indicate a function type hint
 from os import environ
 from sys import stderr
 from pprint import pprint
@@ -17,7 +17,7 @@ def verify_str_length(
     """A wrapper that allows to specify the length bounds for every
     string in a list. Returns a wrapper function because the 'type'
     function in Argparse must accept only 1 argument.
- 
+
     :param lower: lower len str bound, defaults to 0
     :type lower: int, optional
     :param upper: lower len str bound, defaults to 255
@@ -56,6 +56,21 @@ def verify_str_length(
 
 
 def verify_int_range(lower: int = 0, upper: int = 10) -> Callable[[str], int]:
+    """Checks if an int represented by a string lies
+    between lower and upper(inclusively). Returns a function that does
+    checks based on the specified bound.
+    upper defaults to 10 due to the free API topic limit. For other
+    arguments, it makes sense to use different upper/lower limits.
+
+    :param lower: lower bound to check(inclusively), defaults to 0
+    :type lower: int, optional
+    :param upper: upper bound to check(inclusively), defaults to 10
+    :type upper: int, optional
+    :return: a function that accept a str to be converted to int and
+        have the bounds verified
+    :rtype: Callable[[str], int]
+    """
+
     def inner(raw_argument_value: str) -> int:
         # has to be done because we manually rewrite the default 'int' type definition
         # that would take care of the following try-except block
