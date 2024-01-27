@@ -12,11 +12,12 @@ I wanted to use a minimum number of dependencies, so its' only
 
 1. `requests` (everyone should have it installed already anyway)
 2. `pytest` (only if you want to run tests via `python -m pytest tests.py`)
+3. `requests-cache` (optional, only if caching is desired)
 
 ## Sample Usage
 
-```
-usage: News Crawler [-h] --topic TOPIC [--version] [--article_count ARTICLE_COUNT] [--timeout TIMEOUT]
+```{shell}
+usage: News Crawler [-h] --topic TOPIC [--version] [--article_count ARTICLE_COUNT] [--timeout TIMEOUT] [--cache]
 ```
 
 Example:

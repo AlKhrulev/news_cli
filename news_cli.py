@@ -5,7 +5,14 @@ from os import environ
 from sys import stderr
 from pprint import pprint
 import json
-import requests
+
+_cache_available = False
+try:
+    import requests_cache
+
+    _cache_available = True
+except ImportError:
+    import requests
 
 # consider checking https://github.com/public-apis/public-apis#news for other options
 BASE_URL = "https://gnews.io/api/v4/search"
@@ -96,7 +103,7 @@ def verify_int_range(lower: int = 0, upper: int = 10) -> Callable[[str], int]:
 
 
 def create_parser() -> ArgumentParser:
-    """Create a parser with 3 arguments, --topic, --article_count, and --timeout.
+    """Create a parser with 4 arguments: --topic, --article_count, --timeout, and --cache.
     At least 1 topic is required.
     Topic(s) will be verified for length as we don't want to accept very long strings(by default
     from 1 to 255 characters), while article_count and timeout must be ints by default
@@ -132,14 +139,18 @@ A simple command line program to get current news for any topic of interest in a
         default=10,
         help="delay in seconds to wait before termination if the connection can't be established. Defaults to 10 s",
     )
+    parser.add_argument(
+        "--cache",
+        action="store_true",
+        help="Try to cache the result if possible",
+    )
     return parser
 
 
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    print(f"args are {args}")
-
+    print(f"args are {args}")  # REVIEW - delete for release
     if not "NEWS_KEY" in environ:
         print(
             """
@@ -162,8 +173,13 @@ def main():
         "apikey": environ["NEWS_KEY"],
     }
 
-    response = requests.get(url=BASE_URL, params=payload)
-    # to view the url, simply access response.url
+    if _cache_available and args.cache:
+        s = requests_cache.CachedSession(
+            cache_name="news_cli_cache", expire_after=1800  # i.e 30 min
+        )
+    else:
+        s = requests.Session()
+    response = s.get(url=BASE_URL, params=payload)
 
     # raise an error if status code is in 4XXs or 5XXs
     response.raise_for_status()
